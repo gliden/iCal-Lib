@@ -31,7 +31,7 @@ uses
 procedure TiCalTest.Setup;
 begin
   fiCalFile := TiCalFile.Create;
-  fiCalFile.LoadFromFile('..\..\testfile.ics');
+  fiCalFile.LoadFromFile('..\..\referenceFiles\testfile.ics');
 end;
 
 procedure TiCalTest.TearDown;

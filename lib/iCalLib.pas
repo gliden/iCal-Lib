@@ -38,16 +38,26 @@ type
     procedure AssignToEvent(data: TStrings; event: TiCalEvent);
   end;
 
+  TiCalEventWriter = class(TObject)
+  private
+    function StrToStrEscaped(s: String): String;
+    function DateTimeToiCalStr(d: TDateTime): String;
+  public
+    procedure WriteEvent(event: TiCalEvent; data: TStrings);
+  end;
+
 
   TiCalFile = class(TObject)
   private
     fFile: TStringList;
     FEvents: TObjectList<TiCalEvent>;
     FEventReader: TiCalEventReader;
+    FEventWriter: TiCalEventWriter;
   public
     constructor Create;
     destructor Destroy;override;
     procedure LoadFromFile(filename: String);
+    procedure SaveToFile(filename: String);
 
     property Events: TObjectList<TiCalEvent> read FEvents write FEvents;
   end;
@@ -77,11 +87,13 @@ begin
   fEvents := TObjectList<TiCalEvent>.Create;
 
   FEventReader := TiCalEventReader.Create;
+  FEventWriter := TiCalEventWriter.Create;
 end;
 
 destructor TiCalFile.Destroy;
 begin
   FEventReader.Free;
+  FEventWriter.Free;
   FEvents.Free;
   fFile.Free;
   inherited;
@@ -122,6 +134,27 @@ begin
   finally
     eventList.Free;
   end;
+end;
+
+procedure TiCalFile.SaveToFile(filename: String);
+var
+  sl: TStringList;
+  event: TiCalEvent;
+begin
+  sl := TStringList.Create;
+
+  sl.Add('BEGIN:VCALENDAR');
+  sl.Add('VERSION:2.0');
+  sl.Add('METHOD:PUBLISH');
+
+  for event in FEvents do
+  begin
+    FEventWriter.WriteEvent(event, sl);
+  end;
+
+  sl.Add('END:VCALENDAR');
+  sl.SaveToFile(filename);
+  sl.Free;
 end;
 
 { TiCalEventReader }
@@ -200,6 +233,39 @@ begin
   Result := StringReplace(Result, '\,', ',', [rfReplaceAll]);
   Result := StringReplace(Result, '\;', ';', [rfReplaceAll]);
   Result := StringReplace(Result, '\n', #13#10, [rfReplaceAll]);
+end;
+
+{ TiCalEventWriter }
+
+function TiCalEventWriter.DateTimeToiCalStr(d: TDateTime): String;
+begin
+  Result := FormatDateTime('yyyymmdd', d);
+  if Frac(d)<>0 then
+  begin
+    Result := Result + FormatDateTime('"T"hhnnss', d)
+  end;
+end;
+
+function TiCalEventWriter.StrToStrEscaped(s: String): String;
+begin
+  Result := s;
+  Result := StringReplace(Result, '\', '\\', [rfReplaceAll]);
+  Result := StringReplace(Result, ',', '\,', [rfReplaceAll]);
+  Result := StringReplace(Result, ';', '\;', [rfReplaceAll]);
+  Result := StringReplace(Result, #13#10, '\n', [rfReplaceAll]);
+end;
+
+procedure TiCalEventWriter.WriteEvent(event: TiCalEvent; data: TStrings);
+begin
+  data.Add('BEGIN:VEVENT');
+  data.Add('UID:'+event.UId);
+  data.Add('LOCATION:'+StrToStrEscaped(event.Location));
+  data.Add('SUMMARY:'+StrToStrEscaped(event.Summary));
+  data.Add('CLASS:PUBLIC');
+  data.Add('DTSTART:'+DateTimeToiCalStr(event.StartTime));
+  data.Add('DTEND:'+DateTimeToiCalStr(event.EndTime));
+  data.Add('DTSTAMP:'+DateTimeToiCalStr(event.CreatedAt));
+  data.Add('END:VEVENT');
 end;
 
 end.

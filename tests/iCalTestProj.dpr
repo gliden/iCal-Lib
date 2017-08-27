@@ -12,7 +12,8 @@ uses
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
   iCalTest in 'iCalTest.pas',
-  iCalLib in '..\lib\iCalLib.pas';
+  iCalLib in '..\lib\iCalLib.pas',
+  iCalWriterTest in 'iCalWriterTest.pas';
 
 var
   runner : ITestRunner;
