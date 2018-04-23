@@ -145,6 +145,7 @@ begin
 
   sl.Add('BEGIN:VCALENDAR');
   sl.Add('VERSION:2.0');
+  sl.Add('PRODID:https://github.com/gliden/iCal-Lib');
   sl.Add('METHOD:PUBLISH');
 
   for event in FEvents do
@@ -201,8 +202,8 @@ begin
 
   isUTC := s.EndsWith('Z', true);
 
-  Result := EncodeDateTime(yearFrac.ToInteger, monthFrac.ToInteger, dayFrac.ToInteger,
-    hourFrac.ToInteger, minuteFrac.ToInteger, secondFrac.ToInteger, 0);
+  Result := EncodeDateTime(StrToInt(yearFrac), StrToInt(monthFrac), StrToInt(dayFrac),
+    StrToInt(hourFrac), StrToInt(minuteFrac), StrToInt(secondFrac), 0);
 
   if isUTC then
   begin
@@ -260,7 +261,7 @@ begin
   data.Add('BEGIN:VEVENT');
   data.Add('UID:'+event.UId);
   data.Add('LOCATION:'+StrToStrEscaped(event.Location));
-  data.Add('SUMMARY:'+StrToStrEscaped(event.Summary));
+  data.Add(String('SUMMARY:'+StrToStrEscaped(event.Summary)).Substring(0, 75));
   data.Add('CLASS:PUBLIC');
   data.Add('DTSTART:'+DateTimeToiCalStr(event.StartTime));
   data.Add('DTEND:'+DateTimeToiCalStr(event.EndTime));
