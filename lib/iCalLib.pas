@@ -154,7 +154,7 @@ begin
   end;
 
   sl.Add('END:VCALENDAR');
-  sl.SaveToFile(filename);
+  sl.SaveToFile(filename, TEncoding.UTF8);
   sl.Free;
 end;
 

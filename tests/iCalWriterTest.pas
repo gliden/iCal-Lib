@@ -42,13 +42,16 @@ var
   acutalText: string;
   expectedText: string;
   i: Integer;
+  actualFileName: string;
 begin
+  actualFileName := ChangeFileExt(referenceFile, '.act');
+
   event := TiCalEvent.Create;
   event.Summary := 'Neujahr';
   event.UId := 'eigeneId';
   event.StartTime := StrToDateTime('01.01.2017');
   event.EndTime := StrToDateTime('01.01.2017');
-  event.CreatedAt := StrToDateTime('05.01.2016');
+  event.CreatedAt := StrToDateTime('05.01.2016 11:36');
   fiCalFile.Events.Add(event);
 
   for i := 1 to eventCount-1 do
@@ -58,15 +61,15 @@ begin
     event.UId := 'eigeneId'+IntToStr(i);
     event.StartTime := StrToDateTime('01.01.2017 08:00');
     event.EndTime := StrToDateTime('01.01.2017 10:00');
-    event.CreatedAt := StrToDateTime('05.01.2016');
+    event.CreatedAt := StrToDateTime('05.01.2016 11:36');
     event.StartTime := IncHour(event.StartTime, i);
     event.EndTime := IncHour(event.EndTime, i);
     fiCalFile.Events.Add(event);
   end;
 
-  fiCalFile.SaveToFile('..\..\test.ics');
+  fiCalFile.SaveToFile(actualFileName);
 
-  acutalText := TFile.ReadAllText('..\..\test.ics');
+  acutalText := TFile.ReadAllText(actualFileName);
   expectedText := TFile.ReadAllText(referenceFile);
   Assert.AreEqual(expectedText, acutalText, true);
 end;
